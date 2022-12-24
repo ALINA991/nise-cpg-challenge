@@ -2,7 +2,7 @@
 #define DISCRIPTION_LENGTH     15
 #define NOMBER_RS_NEURONS     4
 unsigned long int myTime;
-unsigned int mydelay = 5; // ms
+unsigned int mydelay = 20; // ms
 /******************************************************/ 
 /* Rowat P.F., Selverston, A.I., 
  *  Oscillatory Mechanisms in Pairs of Neurons Connected 
@@ -85,7 +85,7 @@ Pattern PLATEAU = {0.1,5,0.1,1};
 Pattern ALMOSTOSC = {5,0.9,0.1,1};
 
 
-Pattern Almolok = {4.6,1.5,0.5,1};
+// Pattern Almolok = {4.6,1.5,0.5,1};
 // Increase tao 
 
 /******************************************************/ 
@@ -194,10 +194,9 @@ myTime = millis();
 inject current look at the current  time 
 the 3rd and 4th arguments are start and end time respectively */
 inject_current(myTime, &rs_neuron[0], 5000, 5050);
-// inject_current(myTime, &rs_neuron[1], 6000, 6020);
-// inject_current(myTime, &rs_neuron[2], 7000, 7020);
-// inject_current(myTime, &rs_neuron[3], 7000, 8020);
-inject_current(myTime, &rs_neuron[1], 5000, 5050);
+inject_current(myTime, &rs_neuron[1], 6000, 6020);
+inject_current(myTime, &rs_neuron[2], 7000, 7020);
+inject_current(myTime, &rs_neuron[3], 7000, 8020);
 
 /* Update the neurons output*/
 update_locomotion_network();
@@ -208,7 +207,7 @@ for (int i = 0; i< NOMBER_RS_NEURONS ; i++)
 // Serial.print("\t");
 // Serial.print(5.0);
 Serial.print("\t");
-// Serial.print(-1.5);
+// Serial.print(-5.0);
 Serial.print("Loop Completion time");
 Serial.print(millis()- myTime);
 Serial.print("\n");
