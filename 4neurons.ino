@@ -179,8 +179,8 @@ Serial.begin(115200);
 setup_RS_neurons(&rs_neuron[0],QUIESCENT,"Quiescent");
 setup_RS_neurons(&rs_neuron[1],ALMOSTOSC,"Almostoc"); //PLATEAU
 
-setup_RS_neurons(&rs_neuron[1],OSCILLATORY ,"Oscilatory");
-setup_RS_neurons(&rs_neuron[2],PLATEAU,"Plateau");
+setup_RS_neurons(&rs_neuron[2],OSCILLATORY ,"Oscilatory");
+setup_RS_neurons(&rs_neuron[3],PLATEAU,"Plateau");
 //setup_RS_neurons(&rs_neuron[3],OSCILLATORY ,"Fourth neuron");
 }
 
