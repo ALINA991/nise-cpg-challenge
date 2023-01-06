@@ -206,9 +206,10 @@ void loop() {
 
   /* Printing the output of the neurons on serial port*/
   // for (int i = 0; i< NOMBER_M_NEURONS ; i++)
-  // {Serial.print(m_neuron[i].y);
-  // Serial.print(" ");}
-  // Serial.print("\n");
+      {
+        Serial.print(m_neuron[i].y);
+      }
+ Serial.print("\n");
 
   /* delay at the end */
 
