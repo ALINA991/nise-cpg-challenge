@@ -1,0 +1,185 @@
+/******************************************************/ 
+// Matsuoka model
+//(1)... tao * dx/dt = -x - b*xh - totalinput + i_inj
+//(2)... T * dxh/dt = -xh + y
+//(3)... y = max(x, theta)
+//(4)... squre(T - tao) >= 4*T*t*b
+// Here diff_x ≡ dx/dt
+// Here diff_xh ≡ dxh/dt
+/******************************************************/ 
+
+#include <bits/stdc++.h>
+#define DISCRIPTION_LENGTH     15
+// #define NOMBER_M_NEURONS     3
+#define NOMBER_M_NEURONS     20
+unsigned long int myTime;
+unsigned int mydelay = 10; // ms -> this is the interval
+
+/******************************************************/ 
+//struct Matsuoka neuron 
+struct Mneuron { 
+  char discription[DISCRIPTION_LENGTH]; // name 
+  double tao   = 0;  
+  double T     = 0; 
+  double b     = 0; 
+  double x_0    = 0;
+  double xh_0   = 0;
+  double x      = x_0; 
+  double xh     = xh_0;
+  double y = 0;
+  double Y[NOMBER_M_NEURONS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  double a[NOMBER_M_NEURONS]= {0,2.5,0,0,0,0,0,0,0,0,2.5,0,0,0,0,0,0,0,0,2.5};
+  double inj_cur = 0; 
+} m_neuron[NOMBER_M_NEURONS]; 
+
+
+/******************************************************/ 
+//struct Pattern 
+struct Pattern{
+  double tao;
+  double T;
+  double b;
+  };
+Pattern CASE_1 = {1,12,0};
+Pattern CASE_2 = {1,12,2.5};
+Pattern CASE_3 = {1,120000000000000000,25000000000000000};
+
+/******************************************************/ 
+inline double diff_x (double x , double xh , double tao, double b , double a[],  double Y[], double inj_cur){
+    double totalinput = 0;
+    for (int i=0; i<NOMBER_M_NEURONS; i++) {
+        totalinput = totalinput + a[i]*Y[i];
+    }
+    return (double)(-1/tao)*(x + b*xh + totalinput - inj_cur) ; } 
+
+/******************************************************/ 
+inline double  diff_xh (double x , double xh,  double T, double y)
+ { return (double)(-1/T)*(xh - y); } 
+//  default theta =0; y = max(x, theta) = x
+
+/******************************************************/ 
+inline double y_max (double x) {
+    return (x > 0 ) ? x : 0;
+}
+
+/******************************************************/ 
+// C++ program for right rotation of an array (Reversal Algorithm)
+// Ref URL: https://www.geeksforgeeks.org/reversal-algorithm-right-rotation-array/
+// Example: Input: arr[] = {1, 2, 3, 4}; k = 2 → Output: 3,4,1,2
+void reverseArray(double arr[], int start, int end){
+    while (start < end)    {
+        std::swap(arr[start], arr[end]);
+        start++;
+        end--;}
+}
+/* Function to right rotate arr[] of size n by d */
+void rightRotate(double arr[], int d, int n){
+    // if in case d>n,this will give segmentation fault.
+    d=d%n;
+    reverseArray(arr, 0, n-1);
+    reverseArray(arr, 0, d-1);
+    reverseArray(arr, d, n-1);
+}
+
+/******************************************************/ 
+// Runge-Kutta 4th Order Method
+void update_M_neuron(struct Mneuron* m_n, double Y[]){
+int n = 20; 
+double h; 
+//mydelay = Δt[ms] = f(x+Δt)-f(x)
+h= ((double)mydelay/1000)/n;
+double ya[n],yb[n],y[n]; 
+double k1,k2,k3,k4,k, l1,l2,l3,l4,l;  
+
+ya[0] = m_n->x;
+yb[0] = m_n->xh;
+y[0]= m_n->y;
+
+for (int i=0; i<n-1 ; i++){
+  k1 = h*diff_x(ya[i], yb[i], m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
+  l1 = h*diff_xh(ya[i], yb[i], m_n->T, y[0]);
+
+  k2 = h*diff_x(ya[i]+k1/2, yb[i]+l1/2, m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
+  l2 = h*diff_xh(ya[i]+k1/2, yb[i]+l1/2, m_n->T, y[0]);
+
+  k3 = h*diff_x(ya[i]+k2/2, yb[i]+l2/2,m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
+  l3 = h*diff_xh(ya[i]+k2/2, yb[i]+l2/2, m_n->T, y[0]);
+
+  k4 = h*diff_x(ya[i]+k3, yb[i]+l3, m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
+  l4 = h*diff_xh(ya[i]+k3, yb[i]+l3, m_n->T, y[0]);    
+  
+  k = 1/6.0 * (k1 + 2*k2 + 2*k3 + k4);
+  l  = 1/6.0 * (l1 + 2*l2  + 2*l3  + l4);
+  // Serial.print();
+  ya[i+1]= ya[i]+k;
+  yb[i+1]= yb[i]+l;
+  y[i+1]= y_max(ya[i]);
+} 
+m_n->x = ya[n-1]; 
+m_n->xh = yb[n-1]; 
+m_n->y = y[n-1]; 
+return; }
+
+/******************************************************/ 
+void setup_M_neurons(struct Mneuron* m_n,struct Pattern myP){
+m_n->tao = myP.tao; 
+m_n->T = myP.T;
+m_n->b = myP.b;
+}
+
+/******************************************************/ 
+void update_locomotion_network(void){
+double Y_tag[NOMBER_M_NEURONS];
+
+for (int i = 0; i< NOMBER_M_NEURONS ; i++){
+    update_M_neuron(&m_neuron[i], m_neuron[i].Y);
+    Y_tag[i] = m_neuron[i].y;
+    }
+
+for (int j = 0; j< NOMBER_M_NEURONS ; j++){
+  for (int k = 0; k< NOMBER_M_NEURONS ; k++){
+  // copy the vector output to each neuron Y
+      m_neuron[j].Y[k] = Y_tag[k];
+      }
+  }
+}
+
+/******************************************************/ 
+/* put your setup code in setup(), to run once */
+void setup() {
+Serial.begin(115200);
+
+  for (int j = 0; j< NOMBER_M_NEURONS ; j++){
+    setup_M_neurons(&m_neuron[j],CASE_2);
+
+    if (j==0 || j== NOMBER_M_NEURONS/2){
+      m_neuron[j].a[NOMBER_M_NEURONS-1]=0;
+    }
+    if (j== (NOMBER_M_NEURONS/2)-1 || j== NOMBER_M_NEURONS-1){
+      m_neuron[j].a[1]=0;
+    }
+    rightRotate(m_neuron[j].a, j, NOMBER_M_NEURONS);
+  }
+}
+
+/* main code, run repeatedly */
+void loop() {
+/* Read my program running time in milliseconds */
+myTime = millis();
+for (int i = 0; i< NOMBER_M_NEURONS ; i++){
+  m_neuron[i].inj_cur = 0;
+  if (myTime>1000+i*1000) {
+    m_neuron[i].inj_cur = 1;    
+  }
+}
+/* Update the neurons output*/
+update_locomotion_network();
+
+/* Printing the output of the neurons on serial port*/
+for (int i = 0; i< NOMBER_M_NEURONS ; i++)
+{Serial.print(m_neuron[i].y);Serial.print(" ");}
+Serial.print("\n");
+
+/* delay at the end */
+delay(mydelay);
+}
