@@ -199,8 +199,8 @@ for (int i = 0; i< NOMBER_RS_NEURONS ; i++)
 Serial.print("\t");
 Serial.print(5.0);
 Serial.print("\t");
-Serial.print(-5.0);
-Serial.print("Loop Completion time");
+// Serial.print(-1.5);
+Serial.print("Loop Completion time")
 Serial.print(millis()- myTime);
 Serial.print("\n");
 
