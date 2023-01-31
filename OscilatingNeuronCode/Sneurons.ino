@@ -22,10 +22,16 @@
 
 #include <bits/stdc++.h>
 #define DESCRIPTION_LENGTH     15
-#define NUMBER_S_NEURONS     2 // SALAMANDER NEURONS
+#define NUMBER_S_NEURONS     1 // SALAMANDER NEURONS
 #define PI (3.141592653589793)
 unsigned long int myTime;
 unsigned int mydelay = 10; // ms -> this is the interval
+
+double Y_all[NUMBER_S_NEURONS] = {0}; // output from other neurons    : TO INITIALIZE
+double w[NUMBER_S_NEURONS] = {0} ; // weight matrix                  : TO INITIALIZE                     
+double phi[NUMBER_S_NEURONS] = {0}; // phase biases 
+double r_all[NUMBER_S_NEURONS] = {0};  // intrinsic phase               
+double theta_all[NUMBER_S_NEURONS] = {0}; 
 
 /******************************************************/ 
 //struct Salamander neuron 
@@ -42,14 +48,9 @@ struct Sneuron {   // VALUES TO CHECK
   double ddtheta_dt2  = 0;
   double dr_dt        = 0;
   double ddr_dt2      = 0;
-  double inj_cur       = 0; 
+  double inj_cur      = 0; 
 
-  double Y_all[NUMBER_S_NEURONS] = {0,0}; // output from other neurons    : TO INITIALIZE
-  double w[NUMBER_S_NEURONS] = {0,0} ; // weight matrix               : TO INITIALIZE                     
-  double phi[NUMBER_S_NEURONS] = {0,0}; // phase biases 
-  double r_all[NUMBER_S_NEURONS] = {0,0};                 // CHECK HOW TO DEFINE THIS MORE EFFICIENTLY
-  double theta_all[NUMBER_S_NEURONS] = {0,0};
-
+  // check if have to add time constants
 
 } s_neuron[NUMBER_S_NEURONS];  // initialize list of neurons 
 
@@ -66,22 +67,65 @@ struct Pattern{           // CHECK IF THESE ARE THE RIGHT PARAMS TO CHANGE PATTE
 
 Pattern TEST = {1,12,0,0};
 
-inline double find_r (struct Sneuron* s_n, int i) { // get amplitude value of ith neuron
-    return s_n -> r_all[i];
-}
-
-inline double find_theta (struct Sneuron* s_n, int i) { // get phase value of ith neuron 
-    return s_n -> theta_all[i];
-}
-
 
 /******************************************************/ 
-inline double diff_theta (struct Sneuron* s_n){ 
+inline double diff_theta (double v, double w[], double Y_all[], double phi[]){ 
     int sum = 0;
     for (int i = 0; i < NUMBER_S_NEURONS; i++) { // CHECK WHAT HAPPENS IF I = J
-        sum = sum + (  + s_n -> w[i] * s_n -> Y_all[i] - s_n -> phi[i] ); 
+        sum = sum + ( w[i] * Y_all[i] - phi[i] ); 
     }
-    // Serial.print(Y[0]);Serial.print(" ");
-    // Serial.print("\n");
-    return (double)   2 * s_n -> v * PI + sum; 
+    return (double)   2 * v * PI + sum; 
   } 
+
+inline double y (struct Sneuron* s_n){
+  return s_n -> r * (1 + cos( s_n -> theta));
+}
+
+// DEFINE AMPLITUTE VARIBALE CONVERGENCE EQUATION 
+// critically damped second order linear differential equation 
+
+void setup_Sneuron(struct Sneuron* s_n, Pattern myP, String str){
+  for (int i = 0; i < sizeof(str) / sizeof(str[0]) ; i++)
+  s_n -> description[i] = str[i] ; // set name of neuron
+  s_n ->  inj_cur = myP.d;
+  s_n ->  v = myP.v;
+  s_n ->  R = myP.R;
+  s_n ->  a = myP.a;
+}
+
+/******************************************************/ 
+// C++ program for right rotation of an array (Reversal Algorithm)
+// Ref URL: https://www.geeksforgeeks.org/reversal-algorithm-right-rotation-array/
+// Example: Input: arr[] = {1, 2, 3, 4}; k = 2 → Output: 3,4,1,2
+void reverseArray(double arr[], int start, int end){
+    while (start < end)    {
+        std::swap(arr[start], arr[end]);
+        start++;
+        end--;}
+}
+/* Function to right rotate arr[] of size n by d */
+void rightRotate(double arr[], int d, int n){
+    // if in case d>n,this will give segmentation fault.
+    d=d%n;
+    reverseArray(arr, 0, n-1);
+    reverseArray(arr, 0, d-1);
+    reverseArray(arr, d, n-1);
+}
+
+/******************************************************/ 
+// Runge-Kutta 4th Order Method
+void update_S_neuron(struct Sneuron* s_n, double Y_all[], double w[], double phi[]){
+
+int n = 20; 
+double h; 
+//mydelay = Δt[ms] = f(x+Δt)-f(x)
+h = ((double)mydelay/1000)/n;
+
+double k1,k2,k3,k4,k, l1,l2,l3,l4,l;  
+
+double v_curr = s_n -> v; // acces intrinstic freq value 
+double y_curr = s_n -> y; // access output value
+                                            
+for (int i=0; i<n-1 ; i++){  
+
+}
