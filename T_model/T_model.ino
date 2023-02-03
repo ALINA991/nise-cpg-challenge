@@ -370,7 +370,7 @@ void loop() {
   myTime = millis() - mystartTime;
 
   // Inject current for a specific amount of start and stop time 
-  injectcurrent(m_neuron_fast, 5, myTime, 1000, 3000);
+  injectCurrent(m_neuron_fast, 5, myTime, 1000, 3000);
   /* Update the neurons output*/
   update_locomotion_network_slow();
   update_locomotion_network_fast();
@@ -395,7 +395,7 @@ void loop() {
   }
 
 
-  // Actually give out put 
+  // Actually give output 
   if (mode == 1) {
     for (int i = 0; i < NOMBER_M_NEURONS; i++)
     {
@@ -406,7 +406,7 @@ void loop() {
     for (int i = 0; i < NOMBER_M_NEURONS; i++)
     {
       output[i] = m_neuron_fast[i].y;
-      input1[i] = int(map(output[i] * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
+      input[i] = int(map(output[i] * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
     }
   }
 
@@ -418,13 +418,13 @@ void loop() {
   //  if( isMoving1 == 0 ){ //if Dynamixel is stopped
   //Send instruction packet to move for goalPosition
   if (myTime > (5000)) {
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID1, ADDR_AX_GOAL_POSITION, input1, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID2, ADDR_AX_GOAL_POSITION, input2, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID3, ADDR_AX_GOAL_POSITION, input3, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID4, ADDR_AX_GOAL_POSITION, input4, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID5, ADDR_AX_GOAL_POSITION, input5, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID6, ADDR_AX_GOAL_POSITION, input6, &dxl_error);
-    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID7, ADDR_AX_GOAL_POSITION, input7, &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID1, ADDR_AX_GOAL_POSITION, input[0], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID2, ADDR_AX_GOAL_POSITION, input[1], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID3, ADDR_AX_GOAL_POSITION, input[2], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID4, ADDR_AX_GOAL_POSITION, input[3], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID5, ADDR_AX_GOAL_POSITION, input[3], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID6, ADDR_AX_GOAL_POSITION, input[5], &dxl_error);
+    dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, MOTOR_ID7, ADDR_AX_GOAL_POSITION, input[6], &dxl_error);
   }
 
   //toggle the position if goalPosition is 1000, set to 0, if 0, set to 1000
@@ -436,7 +436,7 @@ void loop() {
 
 
 
-  if (input1 == 452) {
+  if (input[0] == 452) {
     count_time = millis() - start_count_time;
     start_count_time = millis();
   }
@@ -445,7 +445,7 @@ void loop() {
 
     for (int i = 0; i < NOMBER_M_NEURONS; i++)
     {
-     Serial.print(input1);
+     Serial.print(input[i]);
       Serial.print("\t");
     }
 
