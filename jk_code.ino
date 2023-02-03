@@ -64,7 +64,7 @@ int16_t dx1_read_change_torque = 0;
 int16_t dxl_read_change_speed = 0;
 
 
-int CW_position_1 = 442;
+int CW_position_1 = 442; 
 int CCW_position_1 = 597;
 
 int CW_position_2 = 462;
@@ -190,6 +190,7 @@ void update_M_neuron_s(struct Mneuron_s* m_n, double Y[]) {
 
   for (int i = 0; i < n - 1; i++) {
     k = h * diff_x(ya[i], yb[i], m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
+    
     l = h * diff_xh(ya[i], yb[i], m_n->T, y[0]);
     ya[i + 1] = ya[i] + k;
     yb[i + 1] = yb[i] + l;
@@ -367,7 +368,7 @@ void setup() {
 int count = 0;
 int start_count = 0;
 int timee = 0;
-int thr_time = 10;
+int thr_time = 300;
 void loop() {
 
 
@@ -375,17 +376,17 @@ void loop() {
 
   sensor_FR = analogRead(analogInPin0);
   sensor_FL = analogRead(analogInPin4);
-  sensor_BR = analogRead(analogInPin6);
-  sensor_BL = analogRead(analogInPin2);
+  sensor_BL = analogRead(analogInPin6);
+  sensor_BR = analogRead(analogInPin2);
 
-  //  Serial.print(sensor_FR);
-  //  Serial.print("\t");
-  //  Serial.print(sensor_FL);
-  //  Serial.print("\t");
-  //  Serial.print(sensor_BR);
-  //  Serial.print("\t");
-  //  Serial.print(sensor_BL);
-  //  Serial.print("\n");
+   Serial.print(sensor_FR);
+   Serial.print("\t");
+   Serial.print(sensor_FL);
+   Serial.print("\t");
+   Serial.print(sensor_BR);
+   Serial.print("\t");
+   Serial.print(sensor_BL);
+   Serial.print("\n");
 
   for (int i = 0; i < NOMBER_M_NEURONS; i++) {
     m_neuron_fast[i].inj_cur = 0;
@@ -399,7 +400,57 @@ void loop() {
   update_locomotion_network_slow();
   update_locomotion_network_fast();
 
-  if ((sensor_FR < 950 || sensor_FL < 950 || sensor_BR < 950 || sensor_BL < 950) && (mode == 1)) {
+  if ((sensor_FR < 775 || sensor_FL < 1000 || sensor_BR < 1000 || sensor_BL < 775) && (mode == 1)) {
+    // output1 = m_neuron_fast[0].y;
+    // output2 = m_neuron_fast[1].y;
+    // output3 = m_neuron_fast[2].y;
+    // output4 = m_neuron_fast[3].y;
+    // output5 = m_neuron_fast[4].y;
+    // output6 = m_neuron_fast[5].y;
+    // output7 = m_neuron_fast[6].y;
+    // input1 = int(map(output1 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input2 = int(map(output2 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input3 = int(map(output3 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input4 = int(map(output4 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input5 = int(map(output5 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input6 = int(map(output6 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input7 = int(map(output7 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+
+    output1 = m_neuron_slow[0].y;
+    output2 = m_neuron_slow[1].y;
+    output3 = m_neuron_slow[2].y;
+    output4 = m_neuron_slow[3].y;
+    output5 = m_neuron_slow[4].y;
+    output6 = m_neuron_slow[5].y;
+    output7 = m_neuron_slow[6].y;
+    input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    mode = 2;
+  } 
+  else if (sensor_FR >= 775 && sensor_FL >= 1000 && sensor_BR >= 1000 && sensor_BL >= 775 && (mode == 2) && (timee < thr_time)) {
+    timee = timee+1;
+
+   }else if (sensor_FR >= 775 && sensor_FL >= 1000 && sensor_BR >= 1000 && sensor_BL >= 775 && (mode == 2) && (timee >= thr_time)) {
+    // output1 = m_neuron_slow[0].y;
+    // output2 = m_neuron_slow[1].y;
+    // output3 = m_neuron_slow[2].y;
+    // output4 = m_neuron_slow[3].y;
+    // output5 = m_neuron_slow[4].y;
+    // output6 = m_neuron_slow[5].y;
+    // output7 = m_neuron_slow[6].y;
+    // input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+
     output1 = m_neuron_fast[0].y;
     output2 = m_neuron_fast[1].y;
     output3 = m_neuron_fast[2].y;
@@ -414,46 +465,26 @@ void loop() {
     input5 = int(map(output5 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
     input6 = int(map(output6 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
     input7 = int(map(output7 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
-    mode = 2;
-  } 
-  else if (sensor_FR >= 950 && sensor_FL >= 950 && sensor_BR >= 950 && sensor_BL >= 950 && (mode == 2) && (timee < thr_time)) {
-    timee = timee+1;
-
-   }else if (sensor_FR >= 950 && sensor_FL >= 950 && sensor_BR >= 950 && sensor_BL >= 950 && (mode == 2) && (timee >= thr_time)) {
-    output1 = m_neuron_slow[0].y;
-    output2 = m_neuron_slow[1].y;
-    output3 = m_neuron_slow[2].y;
-    output4 = m_neuron_slow[3].y;
-    output5 = m_neuron_slow[4].y;
-    output6 = m_neuron_slow[5].y;
-    output7 = m_neuron_slow[6].y;
-    input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
     mode = 1;
     timee = 0;
   }
 
   if (mode == 1) {
-    output1 = m_neuron_slow[0].y;
-    output2 = m_neuron_slow[1].y;
-    output3 = m_neuron_slow[2].y;
-    output4 = m_neuron_slow[3].y;
-    output5 = m_neuron_slow[4].y;
-    output6 = m_neuron_slow[5].y;
-    output7 = m_neuron_slow[6].y;
-    input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-    input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
-  } else if (mode == 2) {
+    // output1 = m_neuron_slow[0].y;
+    // output2 = m_neuron_slow[1].y;
+    // output3 = m_neuron_slow[2].y;
+    // output4 = m_neuron_slow[3].y;
+    // output5 = m_neuron_slow[4].y;
+    // output6 = m_neuron_slow[5].y;
+    // output7 = m_neuron_slow[6].y;
+    // input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    // input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+
     output1 = m_neuron_fast[0].y;
     output2 = m_neuron_fast[1].y;
     output3 = m_neuron_fast[2].y;
@@ -461,13 +492,43 @@ void loop() {
     output5 = m_neuron_fast[4].y;
     output6 = m_neuron_fast[5].y;
     output7 = m_neuron_fast[6].y;
-    input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
-    input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_2, CCW_position_2));
+    input1 = int(map(output1 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input2 = int(map(output2 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input3 = int(map(output3 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input4 = int(map(output4 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input5 = int(map(output5 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input6 = int(map(output6 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    input7 = int(map(output7 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+  } else if (mode == 2) {
+    // output1 = m_neuron_fast[0].y;
+    // output2 = m_neuron_fast[1].y;
+    // output3 = m_neuron_fast[2].y;
+    // output4 = m_neuron_fast[3].y;
+    // output5 = m_neuron_fast[4].y;
+    // output6 = m_neuron_fast[5].y;
+    // output7 = m_neuron_fast[6].y;
+    // input1 = int(map(output1 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input2 = int(map(output2 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input3 = int(map(output3 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input4 = int(map(output4 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input5 = int(map(output5 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input6 = int(map(output6 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+    // input7 = int(map(output7 * 100, 0.0, 30.0, CW_position_2, CCW_position_2));
+
+    output1 = m_neuron_slow[0].y;
+    output2 = m_neuron_slow[1].y;
+    output3 = m_neuron_slow[2].y;
+    output4 = m_neuron_slow[3].y;
+    output5 = m_neuron_slow[4].y;
+    output6 = m_neuron_slow[5].y;
+    output7 = m_neuron_slow[6].y;
+    input1 = int(map(output1 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input2 = int(map(output2 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input3 = int(map(output3 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input4 = int(map(output4 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input5 = int(map(output5 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input6 = int(map(output6 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
+    input7 = int(map(output7 * 100, 100.0, 180.0, CW_position_1, CCW_position_1));
   }
 
   // put your main code here, to run repeatedly:
@@ -507,19 +568,34 @@ void loop() {
     start_count_time = millis();
   }
 
-  Serial.print(input1);
+  // Serial.print(input1);
+  // Serial.print("\t");
+  // Serial.print(input2);
+  // Serial.print("\t");
+  // Serial.print(input3);
+  // Serial.print("\t");
+  // Serial.print(input4);
+  // Serial.print("\t");
+  // Serial.print(input5);
+  // Serial.print("\t");
+  // Serial.print(input6);
+  // Serial.print("\t");
+  // Serial.print(input7);
+
+  Serial.print(output1);
   Serial.print("\t");
-  Serial.print(input2);
+  Serial.print(output2);
+  Serial.print(2);
   Serial.print("\t");
-  Serial.print(input3);
+  Serial.print(output3);
   Serial.print("\t");
-  Serial.print(input4);
+  Serial.print(output4);
   Serial.print("\t");
-  Serial.print(input5);
+  Serial.print(output5);
   Serial.print("\t");
-  Serial.print(input6);
+  Serial.print(output6);
   Serial.print("\t");
-  Serial.print(input7);
+  Serial.print(output7);
   // Serial.print("\t");
   //Serial.print(count_time);
   // Serial.print("\t");
