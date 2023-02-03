@@ -87,7 +87,7 @@ unsigned int mydelay = 10;  // ms -> this is the interval
 
 /******************************************************/
 //struct Matsuoka neuron
-struct Mneuron_f {
+struct Mneuron {
   char discription[DISCRIPTION_LENGTH];  // name
   double tao = 0;
   double T = 0;
@@ -101,23 +101,10 @@ struct Mneuron_f {
   double a[NOMBER_M_NEURONS] = { 1, 1.2, 1.2, 1.2, 1.2, 0, 0 };
   //  double a_slow[NOMBER_M_NEURONS]= {0.7,1.2,1.2,1.2,1.2,0,0};
   double inj_cur = 0;
-} m_neuron_fast[NOMBER_M_NEURONS];
+}; 
 
-struct Mneuron_s {
-  char discription[DISCRIPTION_LENGTH];  // name
-  double tao = 0;
-  double T = 0;
-  double b = 0;
-  double x_0 = 0;
-  double xh_0 = 0;
-  double x = x_0;
-  double xh = xh_0;
-  double y = 0;
-  double Y[NOMBER_M_NEURONS] = { 0, 0, 0, 0, 0, 0, 0 };
-  //  double a_fast[NOMBER_M_NEURONS]= {1,1.2,1.2,1.2,1.2,0,0};
-  double a[NOMBER_M_NEURONS] = { 0.7, 1.2, 1.2, 1.2, 1.2, 0, 0 };
-  double inj_cur = 0;
-} m_neuron_slow[NOMBER_M_NEURONS];
+Mneuron m_neuron_fast[NOMBER_M_NEURONS];
+Mneuron m_neuron_slow[NOMBER_M_NEURONS];
 
 
 /******************************************************/
@@ -126,13 +113,14 @@ struct Pattern {
   double tao;
   double T;
   double b;
+  double a[NOMBER_M_NEURONS];
 };
-//Pattern CASE_1 = {1,12,0};
 
+Pattern CASE_2_fast = { 0.05, 12, 2.5, { 1, 1.2, 1.2, 1.2, 1.2, 0, 0 } };  
+// fast a = { 1, 1.2, 1.2, 1.2, 1.2, 0, 0 }  
+Pattern CASE_2_slow = {0.5, 12.0, 2.5,{0.7, 1.2, 1.2, 1.2, 1.2, 0.0, 0.0}};////
+// slow a = { 0.7, 1.2, 1.2, 1.2, 1.2, 0, 0 }
 
-Pattern CASE_2_fast = { 0.05, 12, 2.5 };
-Pattern CASE_2_slow = { 0.5, 12, 2.5 };
-//Pattern CASE_3 = {1,120000000000000000,25000000000000000};
 
 /******************************************************/
 inline double diff_x(double x, double xh, double tao, double b, double a[], double Y[], double inj_cur) {
@@ -176,7 +164,7 @@ void rightRotate(double arr[], int d, int n) {
 
 /******************************************************/
 // Euler's Method
-void update_M_neuron_s(struct Mneuron_s* m_n, double Y[]) {
+void update_M_neuron(struct Mneuron* m_n, double Y[]) {
   int n = 20;
   double h;
   //mydelay = Δt[ms] = f(x+Δt)-f(x)
@@ -201,76 +189,36 @@ void update_M_neuron_s(struct Mneuron_s* m_n, double Y[]) {
   return;
 }
 
-void update_M_neuron_f(struct Mneuron_f* m_n, double Y[]) {
-  int n = 20;
-  double h;
-  //mydelay = Δt[ms] = f(x+Δt)-f(x)
-  h = ((double)mydelay / 1000) / n;
-  double ya[n], yb[n], y[n];
-  double k1, k2, k3, k4, k, l1, l2, l3, l4, l;
-
-  ya[0] = m_n->x;
-  yb[0] = m_n->xh;
-  y[0] = m_n->y;
-
-  for (int i = 0; i < n - 1; i++) {
-    k = h * diff_x(ya[i], yb[i], m_n->tao, m_n->b, m_n->a, Y, m_n->inj_cur);
-    l = h * diff_xh(ya[i], yb[i], m_n->T, y[0]);
-    ya[i + 1] = ya[i] + k;
-    yb[i + 1] = yb[i] + l;
-    y[i + 1] = y_max(ya[i]);
-  }
-  m_n->x = ya[n - 1];
-  m_n->xh = yb[n - 1];
-  m_n->y = y[n - 1];
-  return;
-}
 
 /******************************************************/
-void setup_M_neurons_f(struct Mneuron_f* m_n, struct Pattern myP) {
+void setup_M_neurons(struct Mneuron* m_n, struct Pattern myP) {
   m_n->tao = myP.tao;
   m_n->T = myP.T;
   m_n->b = myP.b;
-}
+  for (int i = 0; i < NOMBER_M_NEURONS; i++){
+  m_n->a[i] = myP.a[i]; 
+}}
 
-void setup_M_neurons_s(struct Mneuron_s* m_n, struct Pattern myP) {
-  m_n->tao = myP.tao;
-  m_n->T = myP.T;
-  m_n->b = myP.b;
-}
+
 
 /******************************************************/
-void update_locomotion_network_slow(void) {
+void update_locomotion_network(struct Mneuron* m_n) {
   double Y_tag[NOMBER_M_NEURONS];
 
   for (int i = 0; i < NOMBER_M_NEURONS; i++) {
-    update_M_neuron_s(&m_neuron_slow[i], m_neuron_slow[i].Y);
-    Y_tag[i] = m_neuron_slow[i].y;
+    update_M_neuron(&m_n[i], m_n[i].Y);
+    Y_tag[i] = m_n[i].y;
   }
 
   for (int j = 0; j < NOMBER_M_NEURONS; j++) {
     for (int k = 0; k < NOMBER_M_NEURONS; k++) {
       // copy the vector output to each neuron Y
-      m_neuron_slow[j].Y[k] = Y_tag[k];
+      m_n[j].Y[k] = Y_tag[k];
     }
   }
 }
 
-void update_locomotion_network_fast(void) {
-  double Y_tag[NOMBER_M_NEURONS];
 
-  for (int i = 0; i < NOMBER_M_NEURONS; i++) {
-    update_M_neuron_f(&m_neuron_fast[i], m_neuron_fast[i].Y);
-    Y_tag[i] = m_neuron_fast[i].y;
-  }
-
-  for (int j = 0; j < NOMBER_M_NEURONS; j++) {
-    for (int k = 0; k < NOMBER_M_NEURONS; k++) {
-      // copy the vector output to each neuron Y
-      m_neuron_fast[j].Y[k] = Y_tag[k];
-    }
-  }
-}
 
 /******************************************************/
 /* put your setup code in setup(), to run once */
@@ -281,7 +229,7 @@ int mode = 1;
 double output[NOMBER_M_NEURONS];
 int input[NOMBER_M_NEURONS];
 
-void injectCurrent(struct Mneuron_f* m_n, int injectMag, int currentTime, int startTime, int stopTime) {
+void injectCurrent(struct Mneuron* m_n, int injectMag, int currentTime, int startTime, int stopTime) {
   // Function to inject the current
   for (int i = 0; i < NOMBER_M_NEURONS; i++)
   {
@@ -319,11 +267,11 @@ void setup() {
   pinMode(analogInPin6, INPUT);
 
   for (int i = 0; i < NOMBER_M_NEURONS; i++) {
-    setup_M_neurons_s(&m_neuron_slow[i], CASE_2_slow);
+    setup_M_neurons(&m_neuron_slow[i], CASE_2_slow);
     rightRotate(m_neuron_slow[i].a, i, NOMBER_M_NEURONS);
   }
   for (int i = 0; i < NOMBER_M_NEURONS; i++) {
-    setup_M_neurons_f(&m_neuron_fast[i], CASE_2_fast);
+    setup_M_neurons(&m_neuron_fast[i], CASE_2_fast);
     rightRotate(m_neuron_fast[i].a, i, NOMBER_M_NEURONS);
   }
   //  bool flag = true;
@@ -370,10 +318,11 @@ void loop() {
   myTime = millis() - mystartTime;
 
   // Inject current for a specific amount of start and stop time 
-  injectCurrent(m_neuron_fast, 5, myTime, 1000, 3000);
+  injectCurrent(m_neuron_fast, 5, myTime, 1000, 30000);
+  injectCurrent(m_neuron_slow, 5, myTime, 1000, 10000);
   /* Update the neurons output*/
-  update_locomotion_network_slow();
-  update_locomotion_network_fast();
+  update_locomotion_network(m_neuron_fast);
+  update_locomotion_network(m_neuron_slow);
 
 
   // Logic Mode switcher 
